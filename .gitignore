@@ -1,0 +1,62 @@
+build/
+sdkconfig.old
+
+# ESP-IDF Build Output
+build/
+components/*/build/
+sdkconfig
+sdkconfig.old
+bootloader/bootloader.bin
+*.map
+*.elf
+*.bin
+*.hex
+*.obj
+*.o
+*.d
+*.srec
+
+# Project Configuration (Generated)
+project_description.json
+
+# Temporary files and artifacts
+.vscode/
+.devcontainer
+.idea/
+*.pyc
+__pycache__/
+*.log
+*.tmp
+*.backup
+*.swp
+*.swo
+*.gdbinit
+*.gdb_history
+.DS_Store
+Thumbs.db
+
+# Python Virtual Environment (if used)
+venv/
+env/
+.env
+
+# IDF Tools (if installed locally in the project)
+.espressif/
+
+# Documentation Build Output (if you build documentation locally)
+docs/_build/
+
+# CMake related files (can sometimes appear)
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+
+# Component Manager related files
+managed_components/
+
+# Debug files
+core.*
+
+# Any other project-specific files or directories you want to ignore
+# Example:
+# my_private_data/
