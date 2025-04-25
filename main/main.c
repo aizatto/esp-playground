@@ -2,22 +2,26 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
+#include "esp_check.h"
 #include "esp_err.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
 
 #include "main.h"
 #include "aizat.h"
+
+#include "binary_input.h"
 #include "light_driver.h"
 #include "third_party/switch_driver.h"
+
 #include <esp_zigbee_type.h>
 #include <esp_zigbee_cluster.h>
 #include <zcl/esp_zigbee_zcl_basic.h>
 #include <zcl/esp_zigbee_zcl_binary_input.h>
 #include <zcl/esp_zigbee_zcl_ias_zone.h>
+#include <zcl/zb_zcl_basic.h>
 
 #include <zboss_api.h>
-#include <zcl/zb_zcl_basic.h>
 
 #if !defined ZB_ED_ROLE
 #error Define ZB_ED_ROLE in idf.py menuconfig to compile light (End Device) source code.
@@ -25,10 +29,19 @@
 
 static esp_err_t deferred_driver_init(void)
 {
-  // light_driver_init(LIGHT_DEFAULT_OFF);
-  light_driver_init(true);
 
-  return ESP_OK;
+  static bool is_inited = false;
+  if (!is_inited)
+  {
+
+    // light_driver_init(LIGHT_DEFAULT_OFF);
+    light_driver_init(true);
+    ESP_RETURN_ON_FALSE(switch_driver_init(button_func_pair, PAIR_SIZE(button_func_pair), zb_buttons_handler), ESP_FAIL, TAG,
+                        "Failed to initialize switch driver");
+    is_inited = true;
+  }
+
+  return is_inited ? ESP_OK : ESP_FAIL;
 }
 
 static void bdb_start_top_level_commissioning_cb(uint8_t mode_mask)
@@ -54,6 +67,7 @@ void esp_zb_app_signal_handler(esp_zb_app_signal_t *signal_struct)
 
   case ESP_ZB_BDB_SIGNAL_DEVICE_FIRST_START:
   case ESP_ZB_BDB_SIGNAL_DEVICE_REBOOT:
+    configure_binary_input_reporting();
     if (err_status == ESP_OK)
     {
       ESP_LOGI(TAG, "Deferred driver initialization %s", deferred_driver_init() ? "failed" : "successful");
@@ -207,9 +221,11 @@ static void esp_zb_task(void *pvparameters)
   esp_zb_binary_input_cluster_add_attr(binary_input_cluster, ESP_ZB_ZCL_ATTR_BINARY_INPUT_ACTIVE_TEXT_ID, "active");
   esp_zb_binary_input_cluster_add_attr(binary_input_cluster, ESP_ZB_ZCL_ATTR_BINARY_INPUT_DESCRIPTION_ID, "binary input description");
   esp_zb_binary_input_cluster_add_attr(binary_input_cluster, ESP_ZB_ZCL_ATTR_BINARY_INPUT_INACTIVE_TEXT_ID, "inactive");
-  zb_bool_t binary_input_cluster_default_value = ZB_TRUE; // or ZB_TRUE
+  zb_bool_t binary_input_cluster_default_value = ZB_FALSE; // ZB_TRUE or ZB_FALSE
   esp_zb_binary_input_cluster_add_attr(binary_input_cluster, ESP_ZB_ZCL_ATTR_BINARY_INPUT_PRESENT_VALUE_ID, &binary_input_cluster_default_value);
   esp_zb_cluster_list_add_binary_input_cluster(esp_zb_cluster_list, binary_input_cluster, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE);
+
+
 
   // ias zone
   // https://docs.espressif.com/projects/esp-zigbee-sdk/en/latest/esp32/api-reference/zcl/esp_zigbee_zcl_ias_zone.html

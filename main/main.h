@@ -13,11 +13,15 @@
 #define ED_KEEP_ALIVE 3000                             /* 3000 millisecond */
 
 // #define ESP_ZB_PRIMARY_CHANNEL_MASK (1l << 13) /* Zigbee primary channel mask use in the example */
-#define ESP_ZB_PRIMARY_CHANNEL_MASK     ESP_ZB_TRANSCEIVER_ALL_CHANNELS_MASK /* Zigbee primary channel mask use in the example */
+#define ESP_ZB_PRIMARY_CHANNEL_MASK ESP_ZB_TRANSCEIVER_ALL_CHANNELS_MASK /* Zigbee primary channel mask use in the example */
 
-/* Basic manufacturer information */
-#define ESP_MANUFACTURER_NAME "\x05""AIZAT"                 /* Customized manufacturer name */
-#define ESP_MODEL_IDENTIFIER "\x07"CONFIG_IDF_TARGET /* Customized model identifier */
+// Hex has to match the number of characters in your manufacturer name
+#define ESP_MANUFACTURER_NAME "\x05""AIZAT"
+
+// CONFIG_IDF_TARGET is taken from `sdkconfig` which can be configured via
+// 1. idf.py set-target esp32c6
+// 2. idf.py menuconfig
+#define ESP_MODEL_IDENTIFIER "\x07"CONFIG_IDF_TARGET
 
 #define HA_ESP_MULTISTATE_ENDPOINT 10
 #define HA_ESP_BINARY_INPUT_ENDPOINT 11

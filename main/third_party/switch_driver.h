@@ -38,6 +38,9 @@
 
 #include "driver/gpio.h"
 
+#include <zboss_api.h>
+#include <zcl/zb_zcl_basic.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -76,6 +79,7 @@ typedef enum {
 typedef struct {
     uint32_t pin;
     switch_func_t func;
+    zb_bool_t last_state;  // ← Add this!
 } switch_func_pair_t;
 
 typedef void (*esp_switch_callback_t)(switch_func_pair_t *param);

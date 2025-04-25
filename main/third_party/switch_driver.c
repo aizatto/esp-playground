@@ -94,26 +94,61 @@ static void switch_driver_button_detected(void *arg)
     static switch_state_t switch_state = SWITCH_IDLE;
     bool evt_flag = false;
 
+    zb_bool_t last_state = ZB_FALSE;
+    bool once = false;
+
     for (;;) {
         /* check if there is any queue received, if yes read out the button_func_pair */
         if (xQueueReceive(gpio_evt_queue, &button_func_pair, portMAX_DELAY)) {
             io_num =  button_func_pair.pin;
             switch_driver_gpios_intr_enabled(false);
             evt_flag = true;
+            once = false;
         }
         while (evt_flag) {
             bool value = gpio_get_level(io_num);
+            // ESP_LOGI(
+            //     TAG,
+            //     "before %d: %s %s %d",
+            //     io_num,
+            //     value ? "Off" : "On",
+            //     last_state ? "On" : "Off",
+            //     switch_state
+            // );
+            // if (button_func_pair.last_state == value) {
+            //     ESP_LOGI(TAG, "return");
+            //     continue;
+            // }
+
+            // ESP_LOGI(TAG, "continue");
+
+            // button_func_pair.last_state = value;
+            // zb_bool_t new_state = value ? ZB_FALSE : ZB_TRUE;
+
             switch (switch_state) {
             case SWITCH_IDLE:
                 switch_state = (value == GPIO_INPUT_LEVEL_ON) ? SWITCH_PRESS_DETECTED : SWITCH_IDLE;
                 break;
             case SWITCH_PRESS_DETECTED:
                 switch_state = (value == GPIO_INPUT_LEVEL_ON) ? SWITCH_PRESS_DETECTED : SWITCH_RELEASE_DETECTED;
+                if (once == false)
+                {
+                    ESP_LOGI(TAG, "SWITCH_PRESS_DETECTED %d: %s", io_num, value ? "Off" : "On");
+                    (*func_ptr)(&button_func_pair);
+                    once = true;
+                }
+                // }
+                // last_state = new_state;
                 break;
             case SWITCH_RELEASE_DETECTED:
                 switch_state = SWITCH_IDLE;
                 /* callback to button_handler */
-                (*func_ptr)(&button_func_pair);
+                // if (last_state != new_state)
+                // {
+                    ESP_LOGI(TAG, "SWITCH_RELEASE_DETECTED %d: %s", io_num, value ? "Off" : "On");
+                    (*func_ptr)(&button_func_pair);
+                // }
+                // last_state = new_state;
                 break;
             default:
                 break;
@@ -121,6 +156,7 @@ static void switch_driver_button_detected(void *arg)
             if (switch_state == SWITCH_IDLE) {
                 switch_driver_gpios_intr_enabled(true);
                 evt_flag = false;
+                once = true;
                 break;
             }
             vTaskDelay(10 / portTICK_PERIOD_MS);
@@ -136,6 +172,7 @@ static void switch_driver_button_detected(void *arg)
  */
 static bool switch_driver_gpio_init(switch_func_pair_t *button_func_pair, uint8_t button_num)
 {
+    ESP_LOGI(TAG, "switch_driver_gpio_init");
     gpio_config_t io_conf = {};
     switch_func_pair = button_func_pair;
     switch_num = button_num;
