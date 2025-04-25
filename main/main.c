@@ -29,12 +29,9 @@
 
 static esp_err_t deferred_driver_init(void)
 {
-
   static bool is_inited = false;
   if (!is_inited)
   {
-
-    // light_driver_init(LIGHT_DEFAULT_OFF);
     light_driver_init(true);
     ESP_RETURN_ON_FALSE(switch_driver_init(button_func_pair, PAIR_SIZE(button_func_pair), zb_buttons_handler), ESP_FAIL, TAG,
                         "Failed to initialize switch driver");
@@ -164,7 +161,7 @@ static void esp_zb_task(void *pvparameters)
 {
 
   // https://docs.espressif.com/projects/esp-zigbee-sdk/en/latest/esp32/developing.html#enable-debug-mode-and-trace-logging
-#if config_esp_zb_trace_enable
+#if CONFIG_ESP_ZB_TRACE_ENABLE
   esp_zb_set_trace_level_mask(esp_zb_trace_level_critical, esp_zb_trace_subsystem_mac | esp_zb_trace_subsystem_app);
 #endif
 
@@ -224,8 +221,6 @@ static void esp_zb_task(void *pvparameters)
   zb_bool_t binary_input_cluster_default_value = ZB_FALSE; // ZB_TRUE or ZB_FALSE
   esp_zb_binary_input_cluster_add_attr(binary_input_cluster, ESP_ZB_ZCL_ATTR_BINARY_INPUT_PRESENT_VALUE_ID, &binary_input_cluster_default_value);
   esp_zb_cluster_list_add_binary_input_cluster(esp_zb_cluster_list, binary_input_cluster, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE);
-
-
 
   // ias zone
   // https://docs.espressif.com/projects/esp-zigbee-sdk/en/latest/esp32/api-reference/zcl/esp_zigbee_zcl_ias_zone.html
