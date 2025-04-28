@@ -13,6 +13,12 @@ Disclaimers:
 
 ## Projects
 
+I try to create a working prototype in `Arduino` first, and then move on to `esp-idf`.
+
+### arduino-keypad-advanced
+
+A more advanced keypad example where a bit more feedback is given. LED colors rotate when idle, and change brightness when a button is pressed.
+
 ### [esp-keyboard-button](./esp-keyboard-button/)
 
 Figuring out how to wire keyboard / keypad / button matrix.
@@ -20,3 +26,10 @@ Figuring out how to wire keyboard / keypad / button matrix.
 ### [zigbee-binary-input](./zigbee-binary-input/)
 
 Basic example of getting zigbee working with esp32.
+
+## References
+
+1. [ESP Component Registry](https://components.espressif.com/)
+1. [esp-idf](https://docs.espressif.com/projects/esp-idf)
+1. [esp-iot-solution](https://docs.espressif.com/projects/esp-iot-solution/)
+1. [esp-zigbee-sdk](https://docs.espressif.com/projects/esp-zigbee-sdk)
